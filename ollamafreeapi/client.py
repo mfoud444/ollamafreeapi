@@ -2,114 +2,123 @@ import json
 import random
 import os
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Any
 from ollama import Client
 
 class OllamaFreeAPI:
-    def __init__(self):
-        self._models_data = self._load_models_data()
-        self._families = self._extract_families()
-        self._client = None
+    """
+    A client for interacting with LLMs served via Ollama.
+    Uses JSON filenames as the only source of family names.
+    """
     
+    def __init__(self) -> None:
+        """Initialize the client and load model data."""
+        self._models_data: Dict[str, List[Dict[str, Any]]] = self._load_models_data()
+        self._families: Dict[str, List[str]] = self._extract_families()
+        self._client: Optional[Client] = None
+
     @property
-    def client(self):
+    def client(self) -> Client:
+        """Lazy-loaded Ollama client."""
         if self._client is None:
             self._client = Client()
         return self._client
-    
-    def _load_models_data(self) -> Dict[str, List[Dict]]:
-        """Load all model data from JSON files with more flexible parsing"""
-        models_data = {}
+
+    def _load_models_data(self) -> Dict[str, List[Dict[str, Any]]]:
+        """
+        Load model data from JSON files in the ollama_json directory.
+        
+        Returns:
+            Dictionary mapping family names (from filenames) to lists of model data.
+        """
+        models_data: Dict[str, List[Dict[str, Any]]] = {}
         package_dir = Path(__file__).parent
         json_dir = package_dir / "ollama_json"
         
         for json_file in json_dir.glob("*.json"):
-            with open(json_file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                
-                # Flexible model type extraction
-                model_type = os.path.splitext(json_file.name)[0]  # Use filename as fallback
-                if 'props' in data and 'pageProps' in data['props']:
-                    if 'modelType' in data['props']['pageProps']:
-                        model_type = data['props']['pageProps']['modelType']
-                    elif 'models' in data['props']['pageProps']:
-                        # If we have models but no modelType, use filename
-                        pass
-                
-                if 'props' in data and 'pageProps' in data['props'] and 'models' in data['props']['pageProps']:
-                    models_data[model_type] = data['props']['pageProps']['models']
-                else:
-                    # Fallback: try to find models at root level
-                    if 'models' in data:
-                        models_data[model_type] = data['models']
+            try:
+                with open(json_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    family_name = json_file.stem.lower()  # Get family name from filename only
+                    
+                    # Extract models from different possible JSON structures
+                    models = self._extract_models_from_data(data)
+                    if models:
+                        models_data[family_name] = models
+                        print(f"Loaded {len(models)} models from {family_name} family")
+                        
+            except (json.JSONDecodeError, OSError) as e:
+                print(f"Error loading {json_file.name}: {str(e)}")
+                continue
         
         return models_data
-    
+
+    def _extract_models_from_data(self, data: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Extract models list from different possible JSON structures."""
+        if isinstance(data, list):
+            return data
+        if 'props' in data and 'pageProps' in data['props']:
+            return data['props']['pageProps'].get('models', [])
+        return data.get('models', [])
+
     def _extract_families(self) -> Dict[str, List[str]]:
-        """Extract model families and their models with more flexible family detection"""
-        families = {}
-        for model_type, models in self._models_data.items():
-            family_models = {}
+        """
+        Extract model families using ONLY the JSON filenames as family names.
+        
+        Returns:
+            Dictionary mapping family names to lists of model names.
+        """
+        families: Dict[str, List[str]] = {}
+        
+        for family_name, models in self._models_data.items():
+            model_names = []
             for model in models:
-                # More flexible family detection
-                family = model.get('family', 
-                                 model.get('family_name',
-                                          model_type.lower()))
-                model_name = model.get('model_name', 
-                                     model.get('name', 
-                                              model.get('model', '')))
-                
-                if not model_name:
+                if not isinstance(model, dict):
                     continue
                 
-                if family not in family_models:
-                    family_models[family] = []
-                family_models[family].append(model_name)
-            families[model_type] = family_models
+                model_name = self._get_model_name(model)
+                if model_name:
+                    model_names.append(model_name)
+            
+            if model_names:
+                families[family_name] = model_names
+        
         return families
-    
 
-    
+    def _get_model_name(self, model: Dict[str, Any]) -> Optional[str]:
+        """Extract model name from model data using multiple possible fields."""
+        return model.get('model_name') or model.get('model') or model.get('name')
+
     def list_families(self) -> List[str]:
-        """Return all available model families"""
+        """
+        List all available model families (from JSON filenames only).
+        
+        Returns:
+            List of family names.
+        """
         return list(self._families.keys())
-    
+
     def list_models(self, family: Optional[str] = None) -> List[str]:
         """
-        List all models, optionally filtered by family
+        List all models, optionally filtered by family.
         
         Args:
-            family: Filter models by family name
+            family: Filter models by family name (case insensitive)
             
         Returns:
-            List of model names
+            List of model names.
         """
-        if family:
-            return [model for models in self._families.values() 
-                    for fam, mods in models.items() 
-                    if fam.lower() == family.lower() 
-                    for model in mods]
-        return [model for models in self._families.values() 
-                for fam_models in models.values() 
-                for model in fam_models]
-    
+        if family is None:
+            return [model for models in self._families.values() for model in models]
+        
+        return self._families.get(family.lower(), [])
     def get_model_info(self, model_name: str) -> Dict:
-        """
-        Get full metadata for a specific model
-        
-        Args:
-            model_name: Name of the model to get info for
-            
-        Returns:
-            Dictionary containing model metadata
-            
-        Raises:
-            ValueError: If model is not found
-        """
+        """Get full metadata for a specific model"""
         for models in self._models_data.values():
             for model in models:
-                if model['model_name'] == model_name:
-                    return model
+                if isinstance(model, dict):
+                    if model.get('model_name') == model_name or model.get('model') == model_name:
+                        return model
         raise ValueError(f"Model '{model_name}' not found")
     
     def get_model_servers(self, model_name: str) -> List[Dict]:
@@ -271,3 +280,7 @@ class OllamaFreeAPI:
                 continue
         
         raise RuntimeError(f"All servers failed for model '{model_name}'. Last error: {str(last_error)}")
+    
+    
+    
+    
