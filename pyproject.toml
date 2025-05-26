@@ -21,5 +21,5 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/mfoud444/ollamafreeapi"
-Bug Tracker = "https://github.com/mfoud444/ollamafreeapi/issues"
+"Homepage" = "https://github.com/mfoud444/ollamafreeapi"
+"Bug Tracker" = "https://github.com/mfoud444/ollamafreeapi/issues"
