@@ -1,6 +1,3 @@
-Here's the enhanced README.md with clear information about the relationship with ollama-python:
-
-```markdown
 # OllamaFreeAPI
 
 [![PyPI Version](https://img.shields.io/pypi/v/ollamafreeapi)](https://pypi.org/project/ollamafreeapi/)
