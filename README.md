@@ -108,12 +108,6 @@ api.get_server_status()
 | Speed | 50 t/s | 150 t/s |
 | Models | 7B only | All sizes |
 
-## Join Our Community
-
-[![Discord](https://img.shields.io/discord/your-server-id?label=Discord&logo=discord)](https://discord.gg/yourlink)
-[![Twitter](https://img.shields.io/twitter/follow/yourhandle?style=social)](https://twitter.com/yourhandle)
-
-Got questions? Join 5,000+ developers in our active communities!
 
 ## License
 
