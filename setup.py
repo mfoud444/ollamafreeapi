@@ -1,9 +1,18 @@
 from setuptools import setup, find_packages
-from ollamafreeapi.version import VERSION
+import os
+
+# Read version from version.py without importing
+def get_version():
+    version_file = os.path.join('ollamafreeapi', 'version.py')
+    with open(version_file, 'r') as f:
+        for line in f:
+            if line.startswith('VERSION'):
+                return line.split('=')[1].strip().strip('"\'')
+    return '0.0.0'
 
 setup(
     name="ollamafreeapi",
-    version=VERSION,
+    version=get_version(),
     packages=find_packages(),
     package_data={
         'ollamafreeapi': ['ollama_json/*.json'],
