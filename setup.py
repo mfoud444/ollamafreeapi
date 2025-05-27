@@ -1,8 +1,9 @@
 from setuptools import setup, find_packages
+from ollamafreeapi.version import VERSION
 
 setup(
     name="ollamafreeapi",
-    version="0.1.1",
+    version=VERSION,
     packages=find_packages(),
     package_data={
         'ollamafreeapi': ['ollama_json/*.json'],

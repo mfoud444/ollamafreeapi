@@ -27,6 +27,7 @@ class OllamaFreeAPI:
     def _load_models_data(self) -> Dict[str, List[Dict[str, Any]]]:
         """
         Load model data from JSON files in the ollama_json directory.
+        Models are sorted by size and digest/perf_response_text fields are removed.
         
         Returns:
             Dictionary mapping family names (from filenames) to lists of model data.
@@ -41,12 +42,18 @@ class OllamaFreeAPI:
                     data = json.load(f)
                     family_name = json_file.stem.lower()  # Get family name from filename only
                     
-                    # Extract models from different possible JSON structures
                     models = self._extract_models_from_data(data)
                     if models:
-                        models_data[family_name] = models
-                        print(f"Loaded {len(models)} models from {family_name} family")
+                        # Remove digest and perf_response_text fields
+                        for model in models:
+                            if isinstance(model, dict):
+                                model.pop('digest', None)
+                                model.pop('perf_response_text', None)
                         
+                        # Sort models by size (largest first)
+                        models.sort(key=lambda x: int(x.get('size', 0)) if isinstance(x.get('size'), (int, str)) else 0, reverse=True)
+                        models_data[family_name] = models
+
             except (json.JSONDecodeError, OSError) as e:
                 print(f"Error loading {json_file.name}: {str(e)}")
                 continue

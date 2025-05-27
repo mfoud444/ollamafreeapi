@@ -41,3 +41,6 @@ htmlcov/
 *.swp
 *.swo
 d.sh
+exp.py
+ollamafreeapi/tools.py
+trash

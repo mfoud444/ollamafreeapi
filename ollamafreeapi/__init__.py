@@ -1,4 +1,5 @@
 from .client import OllamaFreeAPI
+from .version import VERSION
 
 __all__ = ['OllamaFreeAPI']
-__version__ = '0.1.1'
+__version__ = VERSION

@@ -4,7 +4,7 @@
 [![Python Versions](https://img.shields.io/pypi/pyversions/ollamafreeapi)](https://pypi.org/project/ollamafreeapi/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Free API](https://img.shields.io/badge/Free%20Forever-✓-success)](https://pypi.org/project/ollamafreeapi/)
-[![Discord](https://img.shields.io/discord/your-server-id)](https://discord.gg/yourlink)
+
 
 # Unlock AI Innovation for Free
 
@@ -22,6 +22,12 @@ No payments. No credit cards. Just pure AI power at your fingertips.
 pip install ollamafreeapi
 ```
 
+## 📚 Documentation
+
+- [API Reference](docs/client.md) - Complete API documentation
+- [Usage Examples](docs/examples.md) - Practical code examples
+- [Model Catalog](docs/models.md) - Available models and their capabilities
+
 ## Why Choose OllamaFreeAPI?
 
 | Feature | Others | OllamaFreeAPI |
@@ -32,23 +38,44 @@ pip install ollamafreeapi
 | Ease of Use | Complex setup | Zero-config |
 | Community Support | Paid only | Free & active |
 
-## Get Started in 30 Seconds
+## 📊 Project Statistics
 
+Here are some key statistics about the current state of OllamaFreeAPI:
+
+*   **Active Models:** 651 (Ready to use right now)
+*   **Model Types:** 6 (Different families of models)
+*   **Quantization Methods:** 8 (Ways to run faster)
+*   **Average Size of Models:** 5.3 GB
+
+## 🚀 Quick Start
+
+### Streaming Example
 ```python
 from ollamafreeapi import OllamaFreeAPI
 
-api = OllamaFreeAPI()
+client = OllamaFreeAPI()
+
+# Stream responses in real-time
+for chunk in client.stream_chat('llama3.3:70b', 'Tell me a story:'):
+    print(chunk, end='', flush=True)
+```
+
+### Non-Streaming Example
+```python
+from ollamafreeapi import OllamaFreeAPI
+
+client = OllamaFreeAPI()
 
 # Get instant responses
-response = api.chat(
-    model_name="llama3:latest",
+response = client.chat(
+    model_name="llama3.3:70b",
     prompt="Explain neural networks like I'm five",
     temperature=0.7
 )
 print(response)
 ```
 
-## Featured Model Catalog
+## 🌟 Featured Models
 
 ### Popular Foundation Models
 - `llama3:8b-instruct` - Meta's latest 8B parameter model
@@ -61,7 +88,7 @@ print(response)
 - `mistral:storyteller` - Creative writing specialist
 - `deepseek-coder` - STEM and math expert
 
-## Global AI Infrastructure
+## 🌍 Global Infrastructure
 
 Our free API is powered by:
 - 25+ dedicated GPU servers
@@ -69,7 +96,7 @@ Our free API is powered by:
 - Automatic load balancing
 - 99.5% uptime SLA
 
-## Complete API Reference
+## 📄 API Reference
 
 ### Core Methods
 ```python
@@ -99,7 +126,7 @@ api.generate_api_request(...)
 api.get_server_status()
 ```
 
-## Free Tier Limits
+## 💎 Free Tier Limits
 
 | Resource | Free Tier | Pro Tier |
 |----------|-----------|----------|
@@ -108,10 +135,17 @@ api.get_server_status()
 | Speed | 50 t/s | 150 t/s |
 | Models | 7B only | All sizes |
 
+## 🤝 Contributing
 
-## License
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+## 📄 License
 
 Open-source MIT license - [View License](LICENSE)
 
-> 💡 Pro Tip: Star this repo to get updates on new model additions!
-```
+## 🔗 Links
+
+- [Documentation](docs/client.md)
+- [Examples](docs/examples.md)
+- [GitHub Issues](https://github.com/yourusername/ollamafreeapi/issues)
+
