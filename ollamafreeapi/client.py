@@ -119,51 +119,52 @@ class OllamaFreeAPI:
             return [model for models in self._families.values() for model in models]
         
         return self._families.get(family.lower(), [])
-    def get_model_info(self, model_name: str) -> Dict:
+
+    def get_model_info(self, model: str) -> Dict:
         """Get full metadata for a specific model"""
         for models in self._models_data.values():
-            for model in models:
-                if isinstance(model, dict):
-                    if model.get('model_name') == model_name or model.get('model') == model_name:
-                        return model
-        raise ValueError(f"Model '{model_name}' not found")
+            for model_data in models:
+                if isinstance(model_data, dict):
+                    if model_data.get('model_name') == model or model_data.get('model') == model:
+                        return model_data
+        raise ValueError(f"Model '{model}' not found")
     
-    def get_model_servers(self, model_name: str) -> List[Dict]:
+    def get_model_servers(self, model: str) -> List[Dict]:
         """
         Get all servers hosting a specific model
         
         Args:
-            model_name: Name of the model
+            model: Name of the model
             
         Returns:
             List of server dictionaries containing url and metadata
         """
         servers = []
         for models in self._models_data.values():
-            for model in models:
-                if model['model_name'] == model_name:
+            for model_data in models:
+                if model_data['model_name'] == model:
                     server_info = {
-                        'url': model['ip_port'],
+                        'url': model_data['ip_port'],
                         'location': {
-                            'city': model.get('ip_city_name_en'),
-                            'country': model.get('ip_country_name_en'),
-                            'continent': model.get('ip_continent_name_en')
+                            'city': model_data.get('ip_city_name_en'),
+                            'country': model_data.get('ip_country_name_en'),
+                            'continent': model_data.get('ip_continent_name_en')
                         },
-                        'organization': model.get('ip_organization'),
+                        'organization': model_data.get('ip_organization'),
                         'performance': {
-                            'tokens_per_second': model.get('perf_tokens_per_second'),
-                            'last_tested': model.get('perf_last_tested')
+                            'tokens_per_second': model_data.get('perf_tokens_per_second'),
+                            'last_tested': model_data.get('perf_last_tested')
                         }
                     }
                     servers.append(server_info)
         return servers
     
-    def get_server_info(self, model_name: str, server_url: Optional[str] = None) -> Dict:
+    def get_server_info(self, model: str, server_url: Optional[str] = None) -> Dict:
         """
         Get information about a specific server hosting a model
         
         Args:
-            model_name: Name of the model
+            model: Name of the model
             server_url: Specific server URL (if None, returns first available)
             
         Returns:
@@ -172,33 +173,33 @@ class OllamaFreeAPI:
         Raises:
             ValueError: If model or server not found
         """
-        servers = self.get_model_servers(model_name)
+        servers = self.get_model_servers(model)
         if not servers:
-            raise ValueError(f"No servers found for model '{model_name}'")
+            raise ValueError(f"No servers found for model '{model}'")
         
         if server_url:
             for server in servers:
                 if server['url'] == server_url:
                     return server
-            raise ValueError(f"Server '{server_url}' not found for model '{model_name}'")
+            raise ValueError(f"Server '{server_url}' not found for model '{model}'")
         return servers[0]
     
-    def generate_api_request(self, model_name: str, prompt: str, **kwargs) -> Dict:
+    def generate_api_request(self, model: str, prompt: str, **kwargs) -> Dict:
         """
         Generate the JSON payload for an API request
         
         Args:
-            model_name: Name of the model to use
+            model: Name of the model to use
             prompt: The input prompt
             **kwargs: Additional model parameters (temperature, top_p, etc.)
             
         Returns:
             Dictionary representing the API request payload
         """
-        model_info = self.get_model_info(model_name)
+        model_info = self.get_model_info(model)
         
         payload = {
-            "model": model_name,
+            "model": model,
             "prompt": prompt,
             "options": {
                 "temperature": kwargs.get('temperature', 0.7),
@@ -216,13 +217,13 @@ class OllamaFreeAPI:
                 
         return payload
     
-    def chat(self, model_name: str, prompt: str, **kwargs) -> str:
+    def chat(self, prompt: str, model: Optional[str] = None, **kwargs) -> str:
         """
         Chat with a model using automatic server selection
         
         Args:
-            model_name: Name of the model to use
             prompt: The input prompt
+            model: Name of the model to use (optional, will select random if not provided)
             **kwargs: Additional model parameters
             
         Returns:
@@ -231,9 +232,17 @@ class OllamaFreeAPI:
         Raises:
             RuntimeError: If no working server is found
         """
-        servers = self.get_model_servers(model_name)
+        if model is None:
+            # Get all available models and select one randomly
+            all_models = self.list_models()
+            if not all_models:
+                raise RuntimeError("No models available")
+            model = random.choice(all_models)
+            print(f"Selected model: {model}")
+            
+        servers = self.get_model_servers(model)
         if not servers:
-            raise RuntimeError(f"No servers available for model '{model_name}'")
+            raise RuntimeError(f"No servers available for model '{model}'")
         
         # Try servers in random order (could be enhanced with priority/performance)
         random.shuffle(servers)
@@ -242,22 +251,22 @@ class OllamaFreeAPI:
         for server in servers:
             try:
                 client = Client(host=server['url'])
-                request = self.generate_api_request(model_name, prompt, **kwargs)
+                request = self.generate_api_request(model, prompt, **kwargs)
                 response = client.generate(**request)
                 return response['response']
             except Exception as e:
                 last_error = e
                 continue
         
-        raise RuntimeError(f"All servers failed for model '{model_name}'. Last error: {str(last_error)}")
+        raise RuntimeError(f"All servers failed for model '{model}'. Last error: {str(last_error)}")
     
-    def stream_chat(self, model_name: str, prompt: str, **kwargs):
+    def stream_chat(self, prompt: str, model: Optional[str] = None, **kwargs):
         """
         Stream chat response from a model
         
         Args:
-            model_name: Name of the model to use
             prompt: The input prompt
+            model: Name of the model to use (optional, will select random if not provided)
             **kwargs: Additional model parameters
             
         Yields:
@@ -266,9 +275,17 @@ class OllamaFreeAPI:
         Raises:
             RuntimeError: If no working server is found
         """
-        servers = self.get_model_servers(model_name)
+        if model is None:
+            # Get all available models and select one randomly
+            all_models = self.list_models()
+            if not all_models:
+                raise RuntimeError("No models available")
+            model = random.choice(all_models)
+            print(f"Selected model: {model}")
+            
+        servers = self.get_model_servers(model)
         if not servers:
-            raise RuntimeError(f"No servers available for model '{model_name}'")
+            raise RuntimeError(f"No servers available for model '{model}'")
         
         random.shuffle(servers)
         last_error = None
@@ -276,7 +293,7 @@ class OllamaFreeAPI:
         for server in servers:
             try:
                 client = Client(host=server['url'])
-                request = self.generate_api_request(model_name, prompt, **kwargs)
+                request = self.generate_api_request(model, prompt, **kwargs)
                 request['stream'] = True
                 
                 for chunk in client.generate(**request):
@@ -286,7 +303,57 @@ class OllamaFreeAPI:
                 last_error = e
                 continue
         
-        raise RuntimeError(f"All servers failed for model '{model_name}'. Last error: {str(last_error)}")
+        raise RuntimeError(f"All servers failed for model '{model}'. Last error: {str(last_error)}")
+    
+    def get_llm_params(self, model: Optional[str] = None) -> Dict[str, str]:
+        """
+        Get model and server parameters for OllamaLLM
+        
+        Args:
+            model: Name of the model to use (optional, will select random if not provided)
+            
+        Returns:
+            Dictionary containing model and base_url parameters for OllamaLLM
+            
+        Raises:
+            RuntimeError: If no models or servers are available
+            ValueError: If specified model is not found
+        """
+        if model is None:
+            # Get random model
+            all_models = self.list_models()
+            if not all_models:
+                raise RuntimeError("No models available")
+            model = random.choice(all_models)
+            print(f"Selected model: {model}")
+        else:
+            # Verify the specified model exists
+            if model not in self.list_models():
+                raise ValueError(f"Model '{model}' not found")
+            
+        servers = self.get_model_servers(model)
+        if not servers:
+            raise RuntimeError(f"No servers available for model '{model}'")
+            
+        server = random.choice(servers)
+        print(f"Selected server: {server['url']}")
+        
+        return {
+            "model": model,
+            "base_url": server['url']
+        }
+        
+    def get_random_llm_params(self) -> Dict[str, str]:
+        """
+        Get random model and server parameters for OllamaLLM
+        
+        Returns:
+            Dictionary containing model and base_url parameters for OllamaLLM
+            
+        Raises:
+            RuntimeError: If no models or servers are available
+        """
+        return self.get_llm_params()
     
     
     
