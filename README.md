@@ -19,7 +19,8 @@ OllamaFreeAPI provides free access to leading open-source LLMs including:
 No payments. No credit cards. Just pure AI power at your fingertips.
 
 ```bash
-pip install ollamafreeapi
+# Install or upgrade to the latest version
+pip install ollamafreeapi --upgrade
 ```
 
 ## 📚 Documentation
