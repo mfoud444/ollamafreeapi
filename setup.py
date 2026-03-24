@@ -21,7 +21,7 @@ setup(
         'ollama>=0.1.0',
     ],
     author="Mohammed Foud",
-    author_email="mfoud444",
+    author_email="mfoud444@gmail.com",
     description="A lightweight client for interacting with LLMs served via Ollama",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",

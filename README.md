@@ -11,7 +11,7 @@
 **Access the world's best open language models in one place!**  
 
 OllamaFreeAPI provides free access to leading open-source LLMs including:
-- 🦙 **LLaMA 3** (Meta)
+- 🦙 **LLaMA** (Meta)
 - 🌪️ **Mistral** (Mistral AI)
 - 🔍 **DeepSeek** (DeepSeek)
 - 🦄 **Qwen** (Alibaba Cloud) 
@@ -33,8 +33,8 @@ pip install ollamafreeapi
 | Feature | Others | OllamaFreeAPI |
 |---------|--------|---------------|
 | Free Access | ❌ Limited trials | ✅ Always free |
-| Model Variety | 3-5 models | 50+ models |
-| Global Infrastructure | Single region | 5 continents |
+| Model Variety | 3-5 models | Verified endpoints only |
+| Reliability | Highly variable | Validated active models |
 | Ease of Use | Complex setup | Zero-config |
 | Community Support | Paid only | Free & active |
 
@@ -42,10 +42,9 @@ pip install ollamafreeapi
 
 Here are some key statistics about the current state of OllamaFreeAPI:
 
-*   **Active Models:** 651 (Ready to use right now)
-*   **Model Types:** 6 (Different families of models)
-*   **Quantization Methods:** 8 (Ways to run faster)
-*   **Average Size of Models:** 5.3 GB
+*   **Active Models:** 16 (Ready to use and tested)
+*   **Model Families:** 3 (gemma, llama, qwen)
+*   **Endpoints:** 6 highly reliable server nodes
 
 ## 🚀 Quick Start
 
@@ -56,7 +55,7 @@ from ollamafreeapi import OllamaFreeAPI
 client = OllamaFreeAPI()
 
 # Stream responses in real-time
-for chunk in client.stream_chat('llama3.3:70b', 'Tell me a story:'):
+for chunk in client.stream_chat('What is quantum computing?', model='llama3.2:3b'):
     print(chunk, end='', flush=True)
 ```
 
@@ -68,7 +67,7 @@ client = OllamaFreeAPI()
 
 # Get instant responses
 response = client.chat(
-    model_name="llama3.3:70b",
+    model="gpt-oss:20b",
     prompt="Explain neural networks like I'm five",
     temperature=0.7
 )
@@ -78,23 +77,22 @@ print(response)
 ## 🌟 Featured Models
 
 ### Popular Foundation Models
-- `llama3:8b-instruct` - Meta's latest 8B parameter model
-- `mistral:7b-v0.2` - High-performance 7B model
-- `deepseek-r1:7b` - Strong reasoning capabilities
-- `qwen:7b-chat` - Alibaba's versatile model
+- `llama3.2:3b` - Meta's efficient 3.2B parameter model
+- `deepseek-r1:latest` - Strong reasoning capabilities built on Qwen
+- `gpt-oss:20b` - Powerful Gemma-based 20B completion model
+- `mistral:latest` - High-performance baseline Mistral model
 
 ### Specialized Models
-- `llama3:code` - Optimized for programming
-- `mistral:storyteller` - Creative writing specialist
-- `deepseek-coder` - STEM and math expert
+- `mistral-nemo:custom` - 12.2B open weights language model
+- `bakllava:latest` - Vision and language model
+- `smollm2:135m` - Extremely lightweight assistant
 
 ## 🌍 Global Infrastructure
 
-Our free API is powered by:
-- 25+ dedicated GPU servers
-- 5 global regions (NA, EU, Asia)
-- Automatic load balancing
-- 99.5% uptime SLA
+Our free API is powered by distributed community nodes:
+- Fast response times
+- Automatic load balancing and server selection
+- Real-time availability checks
 
 ## 📄 API Reference
 
@@ -104,36 +102,27 @@ Our free API is powered by:
 api.list_models()  
 
 # Get model details
-api.get_model_info("mistral:7b")  
+api.get_model_info("mistral:latest")  
 
 # Generate text
-api.chat(model_name="llama3:latest", prompt="Your message")
+api.chat(model="llama3.2:3b", prompt="Your message")
 
 # Stream responses
-for chunk in api.stream_chat(...):
+for chunk in api.stream_chat(prompt="Hello!", model="llama3:latest"):
     print(chunk, end='')
 ```
 
 ### Advanced Features
 ```python
 # Check server locations
-api.get_model_servers("deepseek-r1:7b")
+api.get_model_servers("deepseek-r1:latest")
 
 # Generate raw API request
-api.generate_api_request(...)
+api.generate_api_request(model="llama3.2:3b", prompt="Hello")
 
-# Get performance metrics
-api.get_server_status()
+# Get random model parameters (useful for LangChain integration)
+api.get_llm_params()
 ```
-
-## 💎 Free Tier Limits
-
-| Resource | Free Tier | Pro Tier |
-|----------|-----------|----------|
-| Requests | 100/hr | 10,000/hr |
-| Tokens | 16k | 128k |
-| Speed | 50 t/s | 150 t/s |
-| Models | 7B only | All sizes |
 
 ## 🤝 Contributing
 
@@ -148,4 +137,3 @@ Open-source MIT license - [View License](LICENSE)
 - [Documentation](docs/client.md)
 - [Examples](docs/examples.md)
 - [GitHub Issues](https://github.com/yourusername/ollamafreeapi/issues)
-
