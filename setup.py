@@ -4,7 +4,7 @@ import os
 # Read version from version.py without importing
 def get_version():
     version_file = os.path.join('ollamafreeapi', 'version.py')
-    with open(version_file, 'r') as f:
+    with open(version_file, 'r', encoding='utf-8') as f:
         for line in f:
             if line.startswith('VERSION'):
                 return line.split('=')[1].strip().strip('"\'')
@@ -23,7 +23,7 @@ setup(
     author="Mohammed Foud",
     author_email="mfoud444@gmail.com",
     description="A lightweight client for interacting with LLMs served via Ollama",
-    long_description=open("README.md").read(),
+    long_description=open("README.md", "r", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/mfoud444/ollamafreeapi",
     classifiers=[
