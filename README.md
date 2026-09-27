@@ -28,6 +28,7 @@ pip install ollamafreeapi --upgrade
 - [API Reference](docs/client.md) - Complete API documentation
 - [Usage Examples](docs/examples.md) - Practical code examples
 - [Model Catalog](docs/models.md) - Available models and their capabilities
+- [Samsung Android / Termux](docs/termux.md) - Install from F-Droid and use the Hermes skill
 
 ## Why Choose OllamaFreeAPI?
 
